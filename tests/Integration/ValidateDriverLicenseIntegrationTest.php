@@ -1,6 +1,6 @@
 <?php
 
-namespace LegacyFighter\Cabs\Tests\integration;
+namespace LegacyFighter\Cabs\Tests\Integration;
 
 use LegacyFighter\Cabs\DTO\DriverDTO;
 use LegacyFighter\Cabs\Entity\Driver;
