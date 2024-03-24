@@ -6,6 +6,8 @@ use Doctrine\ORM\Mapping\Column;
 use Doctrine\ORM\Mapping\Entity;
 use Doctrine\ORM\Mapping\OneToOne;
 use LegacyFighter\Cabs\Common\BaseEntity;
+use LegacyFighter\Cabs\Money\Money;
+use LegacyFighter\Cabs\Service\DriverFeeService;
 
 #[Entity]
 class DriverFee extends BaseEntity
@@ -22,10 +24,10 @@ class DriverFee extends BaseEntity
     #[Column(type: 'integer')]
     private int $amount;
 
-    #[Column(type: 'integer', nullable: true)]
-    private ?int $min;
+    #[Column(type: 'money', nullable: true)]
+    private ?Money $min;
 
-    public function __construct(string $type, Driver $driver, int $amount, ?int $min = null)
+    public function __construct(string $type, Driver $driver, int $amount, ?Money $min = null)
     {
         $this->type = $type;
         $this->driver = $driver;
@@ -53,23 +55,23 @@ class DriverFee extends BaseEntity
         $this->driver = $driver;
     }
 
-    public function getAmount(): int
-    {
-        return $this->amount;
-    }
-
     public function setAmount(int $amount): void
     {
         $this->amount = $amount;
     }
 
-    public function getMin(): ?int
-    {
-        return $this->min;
-    }
-
-    public function setMin(?int $min): void
+    public function setMin(?Money $min): void
     {
         $this->min = $min;
+    }
+
+    public function calculateDriverFee(Money $transitPrice): Money
+    {
+        if ($this->type === DriverFee::TYPE_FLAT) {
+            $finalFee = $transitPrice->subtract(Money::from($this->amount));
+        } else {
+            $finalFee = $transitPrice->percentage($this->amount);
+        }
+        return Money::from((int)max($finalFee->toInt(), $this->min === null ? 0 : $this->min->toInt()));
     }
 }

@@ -3,6 +3,7 @@
 namespace LegacyFighter\Cabs\Service;
 
 use LegacyFighter\Cabs\Entity\DriverFee;
+use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 
@@ -17,7 +18,7 @@ class DriverFeeService
         $this->transitRepository = $transitRepository;
     }
 
-    public function calculateDriverFee(int $transitId): int
+    public function calculateDriverFee(int $transitId): Money
     {
         $transit = $this->transitRepository->getOne($transitId);
         if($transit === null) {
@@ -31,12 +32,7 @@ class DriverFeeService
         if($driverFee === null) {
             throw new \InvalidArgumentException('driver Fees not defined for driver, driver id = '.$transit->getDriver()->getId());
         }
-        if($driverFee->getType() === DriverFee::TYPE_FLAT) {
-            $finalFee = $transitPrice - $driverFee->getAmount();
-        } else {
-            $finalFee = $transitPrice * $driverFee->getAmount() / 100;
-        }
 
-        return max($finalFee, $driverFee->getMin() === null ? 0 : $driverFee->getMin());
+        return $driverFee->calculateDriverFee($transitPrice);
     }
 }

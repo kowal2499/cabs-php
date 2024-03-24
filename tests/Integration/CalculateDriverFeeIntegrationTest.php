@@ -5,6 +5,7 @@ namespace LegacyFighter\Cabs\Tests\Integration;
 use LegacyFighter\Cabs\Entity\Driver;
 use LegacyFighter\Cabs\Entity\DriverFee;
 use LegacyFighter\Cabs\Entity\Transit;
+use LegacyFighter\Cabs\Money\Money;
 use LegacyFighter\Cabs\Repository\DriverFeeRepository;
 use LegacyFighter\Cabs\Repository\TransitRepository;
 use LegacyFighter\Cabs\Service\DriverFeeService;
@@ -40,7 +41,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         $fee = $this->driverFeeService->calculateDriverFee($transit->getId());
 
         //then
-        self::assertEquals(50, $fee);
+        self::assertEquals(Money::from(50), $fee);
     }
 
     /** @test */
@@ -57,7 +58,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         $fee = $this->driverFeeService->calculateDriverFee($transit->getId());
 
         //then
-        self::assertEquals(40, $fee);
+        self::assertEquals(Money::from(40), $fee);
     }
 
     /** @test */
@@ -74,7 +75,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
         $fee = $this->driverFeeService->calculateDriverFee($transit->getId());
 
         //then
-        self::assertEquals(5, $fee);
+        self::assertEquals(Money::from(5), $fee);
     }
 
 
@@ -90,7 +91,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
 
     private function driverHasFeeWithMin(Driver $driver, string $feeType, int $amount, int $min): DriverFee
     {
-        $driverFee = new DriverFee($feeType, $driver, $amount, $min);
+        $driverFee = new DriverFee($feeType, $driver, $amount, Money::from($min));
         return $this->feeRepository->save($driverFee);
     }
 
@@ -98,7 +99,7 @@ class CalculateDriverFeeIntegrationTest extends KernelTestCase
     {
         $transit = new Transit();
         $transit->setStatus(Transit::STATUS_DRAFT);
-        $transit->setPrice($price);
+        $transit->setPrice(Money::from($price));
         $transit->setDriver($driver);
         $transit->setDateTime(new \DateTimeImmutable('2020-10-20'));
         return $this->transitRepository->save($transit);
